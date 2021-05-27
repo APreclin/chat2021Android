@@ -108,7 +108,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         protected void onPostExecute(String hash) {
             Log.i(LoginActivity.this.CAT,"onPostExecute");
             Log.i(LoginActivity.this.CAT,hash);
-            LoginActivity.this.alerter(hash);
 
 
             Intent iVersChoixConv = new Intent(LoginActivity.this,ChoixConvActivity.class);
@@ -158,7 +157,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     public void onClick(View v) {
         // Lors de l'appui sur le bouton OK
         // si case est cochée, enregistrer les données dans les préférences
-        alerter("click sur OK");
         if (cbRemember.isChecked()) {
             editor.putBoolean("remember",true);
             editor.putString("login", edtLogin.getText().toString());
@@ -198,13 +196,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_settings :
-                alerter("Préférences");
                 // Changer d'activité pour afficher PrefsActivity
                 Intent change2Prefs = new Intent(this,PrefActivity.class);
                 startActivity(change2Prefs);
                 break;
             case R.id.action_account :
-                alerter("Compte");
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -239,7 +235,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             }
         }
 
-        alerter(sType);
         return bStatut;
     }
 

@@ -34,7 +34,6 @@ public class ChoixConvActivity extends AppCompatActivity implements View.OnClick
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choix_conversation);
         Bundle bdl = this.getIntent().getExtras();
-        Log.i(CAT,bdl.getString("hash"));
         hash = bdl.getString("hash");
         listeConv = findViewById(R.id.choixConversation_choixConv);
         btnOK = findViewById(R.id.choixConversation_btnOK);
@@ -60,7 +59,6 @@ public class ChoixConvActivity extends AppCompatActivity implements View.OnClick
                     @Override
                     public void onItemSelected(AdapterView<?> arg0, View arg1,
                                                int arg2, long arg3) {
-                        alerter("ID ITEM SELECTED " + Integer.toString(idArray.get(arg2 + 1)));
                         idItemSelected = idArray.get(arg2);
                     }
 
@@ -89,7 +87,6 @@ public class ChoixConvActivity extends AppCompatActivity implements View.OnClick
 
     @Override
     public void onClick(View v) {
-        alerter("Click sur OK Conv");
         Intent change2Conv = new Intent(this,ConvActivity.class);
         Bundle bdl = new Bundle();
         // Conversation conv = (Conversation) listeConv.getSelectedItem();
