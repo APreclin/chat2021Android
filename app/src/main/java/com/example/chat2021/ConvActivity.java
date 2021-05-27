@@ -10,6 +10,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -33,8 +35,11 @@ public class ConvActivity extends AppCompatActivity implements View.OnClickListe
     APIInterface apiService;
     String hash;
     ListMessage lm;
+    Message m;
     ImageButton galleryButton;
     ImageButton cameraButton;
+    Button btnSend;
+    EditText txtMsg;
     String photoPath;
     private static int RESULT_LOAD_IMAGE = 1;
     private static int RESULT_CAMERA_IMAGE = 2;
@@ -47,7 +52,10 @@ public class ConvActivity extends AppCompatActivity implements View.OnClickListe
         conversationLayout = (LinearLayout) findViewById(R.id.conversation_svLayoutMessages);
         galleryButton = findViewById(R.id.galleryButton);
         cameraButton = findViewById(R.id.cameraButton);
+        btnSend = findViewById(R.id.conversation_btnOK);
+        txtMsg = findViewById(R.id.conversation_edtMessage);
 
+        btnSend.setOnClickListener(this);
         galleryButton.setOnClickListener(this);
         cameraButton.setOnClickListener(this);
 
@@ -60,14 +68,7 @@ public class ConvActivity extends AppCompatActivity implements View.OnClickListe
             public void onResponse(Call<ListMessage> call, Response<ListMessage> response) {
                 lm = response.body();
                 for(Message m : lm.messages) {
-                    TextView message = new TextView(ConvActivity.this);
-                    message.setText(m.contenu);
-                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            LinearLayout.LayoutParams.MATCH_PARENT
-                    );
-                    message.setLayoutParams(params);
-                    conversationLayout.addView(message);
+                    addMessageTextView(m);
                 }
 
                 Log.i(CAT,lm.toString());
@@ -130,7 +131,38 @@ public class ConvActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 }
                 break;
+
+            case R.id.conversation_btnOK:
+                Bundle bdl = this.getIntent().getExtras();
+                hash = bdl.getString("hash");
+                Call<Message> call1 = apiService.doSendMessage(hash, Integer.parseInt(bdl.getString("conv")), txtMsg.getText().toString());
+                call1.enqueue(new Callback<Message>() {
+                    @Override
+                    public void onResponse(Call<Message> call, Response<Message> response) {
+                        m = response.body();
+                        lm.add(m);
+                        addMessageTextView(m);
+                        Log.i(CAT, m.toString());
+                    }
+
+                    @Override
+                    public void onFailure(Call<Message> call, Throwable t) {
+                    }
+                });
+            break;
         }
+    }
+
+    private void addMessageTextView(Message m) {
+        conversationLayout = (LinearLayout) findViewById(R.id.conversation_svLayoutMessages);
+        TextView message = new TextView(ConvActivity.this);
+        message.setText(m.contenu);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+        );
+        message.setLayoutParams(params);
+        conversationLayout.addView(message);
     }
 
     private File createImageFile() throws IOException {

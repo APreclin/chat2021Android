@@ -11,4 +11,9 @@ public class ListMessage {
                 "messages=" + messages +
                 '}';
     }
+
+    public boolean add(Message m) {
+        return messages.add(m);
+
+    }
 }

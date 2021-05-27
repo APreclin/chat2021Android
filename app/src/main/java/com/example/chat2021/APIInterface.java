@@ -20,6 +20,10 @@ interface APIInterface {
     @GET("conversations/{id}/messages")
     Call<ListMessage> doGetListMessage(@Header("hash") String hash, @Path("id") int convId);
 
+    @FormUrlEncoded
+    @POST("conversations/{id}/messages")
+    Call<Message> doSendMessage(@Header("hash") String hash, @Path("id") int convId, @Field("contenu") String contenu);
+
     /*
     //  req. GET : @Query
     //  req. POST : @Body (object qui sera désérialisé)
