@@ -77,25 +77,11 @@ public class ConvActivity extends AppCompatActivity implements View.OnClickListe
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && data != null) {
-            /*
             Uri selectedImage = data.getData();
-            String[] filePathColumn = { MediaStore.Images.Media.DATA };
-            Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
-            cursor.moveToFirst();
-            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-            String picturePath = cursor.getString(columnIndex);
-            cursor.close();
-             */
             ImageView image = new ImageView(ConvActivity.this);
-            // image.setImageBitmap(BitmapFactory.decodeFile(picturePath));
-            Bitmap bm = data.getExtras().getParcelable("data");
-            image.setImageBitmap(bm);
-            // image.setImageURI(selectedImage);
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.MATCH_PARENT
-            );
-            image.setLayoutParams(params);
+            image.setImageURI(selectedImage);
+            image.setAdjustViewBounds(true);
+
             conversationLayout.addView(image);
         }
     }
@@ -104,18 +90,8 @@ public class ConvActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.galleryButton:
-                /*Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(i, RESULT_LOAD_IMAGE);*/
-                Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
-                getIntent.setType("image/*");
-
-                Intent pickIntent = new Intent(Intent.ACTION_PICK);
-                pickIntent.setType("image/*");
-
-                Intent chooseIntent = Intent.createChooser(getIntent, "Select image");
-                chooseIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] { pickIntent });
-
-                startActivityForResult(chooseIntent, RESULT_LOAD_IMAGE);
+                Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(i, RESULT_LOAD_IMAGE);
                 break;
         }
     }
