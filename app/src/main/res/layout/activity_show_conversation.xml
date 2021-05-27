@@ -1,0 +1,79 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/RelativeLayout1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/orange"
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
+
+    <EditText
+        android:id="@+id/conversation_edtMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:background="@color/blanc"
+        android:ems="10"
+        android:inputType="textMultiLine" />
+
+    <Button
+        android:id="@+id/conversation_btnOK"
+        android:layout_width="63dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:enabled="true"
+        android:text="@string/ok" />
+
+    <ScrollView
+        android:id="@+id/conversation_svMessages"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/conversation_btnOK"
+        android:layout_alignLeft="@+id/conversation_titre"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/conversation_titre"
+        android:background="@color/blanc" >
+
+        <LinearLayout
+            android:id="@+id/conversation_svLayoutMessages"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" />
+    </ScrollView>
+
+    <TextView
+        android:id="@+id/conversation_titre"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/conversation_btnOK"
+        android:gravity="center|center_horizontal"
+        android:text="@string/conversation"
+        android:textAlignment="gravity"
+        android:textColor="@color/blanc"
+        android:textSize="20pt" />
+
+    <ImageButton
+        android:id="@+id/galleryButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/conversation_svMessages"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="134dp"
+        android:layout_marginBottom="-51dp"
+        app:srcCompat="@android:drawable/ic_menu_gallery" />
+
+    <ImageButton
+        android:id="@+id/imageButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/conversation_svMessages"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="71dp"
+        android:layout_marginBottom="-51dp"
+        app:srcCompat="@android:drawable/ic_menu_camera" />
+
+</RelativeLayout>
