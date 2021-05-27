@@ -1,12 +1,11 @@
 package com.example.chat2021;
 
 import android.content.Intent;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,8 +16,10 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -33,7 +34,10 @@ public class ConvActivity extends AppCompatActivity implements View.OnClickListe
     String hash;
     ListMessage lm;
     ImageButton galleryButton;
+    ImageButton cameraButton;
+    String photoPath;
     private static int RESULT_LOAD_IMAGE = 1;
+    private static int RESULT_CAMERA_IMAGE = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +46,10 @@ public class ConvActivity extends AppCompatActivity implements View.OnClickListe
         conversation = findViewById(R.id.conversation_svMessages);
         conversationLayout = (LinearLayout) findViewById(R.id.conversation_svLayoutMessages);
         galleryButton = findViewById(R.id.galleryButton);
+        cameraButton = findViewById(R.id.cameraButton);
+
         galleryButton.setOnClickListener(this);
+        cameraButton.setOnClickListener(this);
 
         Bundle bdl = this.getIntent().getExtras();
         hash = bdl.getString("hash");
@@ -76,7 +83,9 @@ public class ConvActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && data != null) {
+        if (resultCode != RESULT_OK) return;
+
+        if (requestCode == RESULT_LOAD_IMAGE && data != null) {
             Uri selectedImage = data.getData();
             ImageView image = new ImageView(ConvActivity.this);
             image.setImageURI(selectedImage);
@@ -84,15 +93,54 @@ public class ConvActivity extends AppCompatActivity implements View.OnClickListe
 
             conversationLayout.addView(image);
         }
+
+        if (requestCode == RESULT_CAMERA_IMAGE) {
+            File file = new File(photoPath);
+            Uri imageUri = Uri.fromFile(file);
+            ImageView imageCamera = new ImageView(ConvActivity.this);
+            imageCamera.setImageURI(imageUri);
+            imageCamera.setAdjustViewBounds(true);
+
+            conversationLayout.addView(imageCamera);
+        }
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.galleryButton:
-                Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(i, RESULT_LOAD_IMAGE);
+                Intent intentGallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(intentGallery, RESULT_LOAD_IMAGE);
+                break;
+
+            case R.id.cameraButton:
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                if (intent.resolveActivity(getPackageManager()) != null) {
+                    File photo = null;
+                    try {
+                        photo = createImageFile();
+                    } catch (IOException ex) {
+                        Log.i(CAT, "IOException");
+                    }
+
+                    if (photo != null) {
+                        Uri photoUri = FileProvider.getUriForFile(this, "com.example.chat2021.fileprovider", photo);
+                        intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+                        startActivityForResult(intent, RESULT_CAMERA_IMAGE);
+                    }
+                }
                 break;
         }
+    }
+
+    private File createImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFile = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(imageFile, ".jpg", storageDir);
+
+        photoPath = image.getAbsolutePath();
+
+        return image;
     }
 }
