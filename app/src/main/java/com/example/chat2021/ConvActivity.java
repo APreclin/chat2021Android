@@ -8,15 +8,21 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,8 +36,7 @@ import retrofit2.Response;
 public class ConvActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String CAT = "LE4-SI";
-    ScrollView conversation;
-    LinearLayout conversationLayout;
+    RelativeLayout conversationLayout;
     APIInterface apiService;
     String hash;
     ListMessage lm;
@@ -43,13 +48,23 @@ public class ConvActivity extends AppCompatActivity implements View.OnClickListe
     String photoPath;
     private static int RESULT_LOAD_IMAGE = 1;
     private static int RESULT_CAMERA_IMAGE = 2;
+    private MessagesAdapter messagesAdapter;
+    private RecyclerView conversation;
+    private ProgressBar mProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_conversation);
-        conversation = findViewById(R.id.conversation_svMessages);
-        conversationLayout = (LinearLayout) findViewById(R.id.conversation_svLayoutMessages);
+
+        mProgressBar=(ProgressBar)findViewById(R.id.progress_bar);
+        mProgressBar.setVisibility(View.VISIBLE);
+
+        conversation = findViewById(R.id.conversation_rvMessages);
+        conversationLayout = (RelativeLayout) findViewById(R.id.relativeLayoutMessages);
+        conversation=(RecyclerView)findViewById(R.id.conversation_rvMessages);
+        conversation.setLayoutManager(new LinearLayoutManager(this));
+
         galleryButton = findViewById(R.id.galleryButton);
         cameraButton = findViewById(R.id.cameraButton);
         btnSend = findViewById(R.id.conversation_btnOK);
@@ -67,23 +82,36 @@ public class ConvActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onResponse(Call<ListMessage> call, Response<ListMessage> response) {
                 lm = response.body();
-                for(Message m : lm.messages) {
-                    addMessageTextView(m);
-                }
-
+                messagesAdapter = new MessagesAdapter(lm);
+                conversation.setAdapter(messagesAdapter);
                 Log.i(CAT,lm.toString());
             }
 
             @Override
             public void onFailure(Call<ListMessage> call, Throwable t) {
-                call.cancel();
+                Toast.makeText(ConvActivity.this,"Can't get messages from API",Toast.LENGTH_SHORT).show();
             }
         });
+        mProgressBar.setVisibility(View.GONE);
     }
+
+    /*
+    private void addMessageTextView(Message m) {
+        conversationLayout = (LinearLayout) findViewById(R.id.conversation_rvLayoutMessages);
+        TextView message = new TextView(ConvActivity.this);
+        message.setText(m.contenu);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+        );
+        message.setLayoutParams(params);
+        conversationLayout.addView(message);
+    }*/
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
         if (resultCode != RESULT_OK) return;
 
         if (requestCode == RESULT_LOAD_IMAGE && data != null) {
@@ -108,15 +136,19 @@ public class ConvActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
+        Log.i(CAT, "click sur " + v.getId());
         switch (v.getId()) {
             case R.id.galleryButton:
+                Log.i(CAT, "galerie bouton");
                 Intent intentGallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(intentGallery, RESULT_LOAD_IMAGE);
                 break;
 
             case R.id.cameraButton:
+                Log.i(CAT, "camera bouton");
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 if (intent.resolveActivity(getPackageManager()) != null) {
+                    Log.i(CAT, "camera bouton");
                     File photo = null;
                     try {
                         photo = createImageFile();
@@ -133,6 +165,7 @@ public class ConvActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.conversation_btnOK:
+                Log.i(CAT, "ok bouton");
                 Bundle bdl = this.getIntent().getExtras();
                 hash = bdl.getString("hash");
                 Call<Message> call1 = apiService.doSendMessage(hash, Integer.parseInt(bdl.getString("conv")), txtMsg.getText().toString());
@@ -141,7 +174,8 @@ public class ConvActivity extends AppCompatActivity implements View.OnClickListe
                     public void onResponse(Call<Message> call, Response<Message> response) {
                         m = response.body();
                         lm.add(m);
-                        addMessageTextView(m);
+                        messagesAdapter = new MessagesAdapter(lm);
+                        conversation.setAdapter(messagesAdapter);
                         Log.i(CAT, m.toString());
                     }
 
@@ -151,18 +185,6 @@ public class ConvActivity extends AppCompatActivity implements View.OnClickListe
                 });
             break;
         }
-    }
-
-    private void addMessageTextView(Message m) {
-        conversationLayout = (LinearLayout) findViewById(R.id.conversation_svLayoutMessages);
-        TextView message = new TextView(ConvActivity.this);
-        message.setText(m.contenu);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT
-        );
-        message.setLayoutParams(params);
-        conversationLayout.addView(message);
     }
 
     private File createImageFile() throws IOException {

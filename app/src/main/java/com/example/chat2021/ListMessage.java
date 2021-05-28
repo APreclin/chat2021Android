@@ -16,4 +16,8 @@ public class ListMessage {
         return messages.add(m);
 
     }
+
+    public Message get(int index) {
+        return messages.get(index);
+    }
 }
