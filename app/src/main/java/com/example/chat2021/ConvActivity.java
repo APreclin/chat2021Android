@@ -143,6 +143,7 @@ public class ConvActivity extends AppCompatActivity implements View.OnClickListe
                         lm.add(m);
                         addMessageTextView(m);
                         Log.i(CAT, m.toString());
+                        txtMsg.setText("");
                     }
 
                     @Override
